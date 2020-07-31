@@ -5,24 +5,27 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Entity
-@Table(name = "tasks")
- public class Task {
+@Table(name = "taskgroup")
+public class TaskGroup {
 
     @Id @GeneratedValue
     private int id;
     @NotBlank
     private String description;
     private boolean done;
-    private LocalDateTime deadline;
     @Embedded
     private Audit audit = new Audit();
+    @OneToMany(cascade = CascadeType.ALL,mappedBy = "group")
+    private Set<Task> tasks;
     @ManyToOne
-    @JoinColumn(name = "task_group_id")
-    private TaskGroup group;
+    @JoinColumn(name = "project_id")
+    private Project project;
 
-    Task(){
+
+    TaskGroup(){
 
     }
 
@@ -50,21 +53,27 @@ import java.time.LocalDateTime;
         this.done = done;
     }
 
-    public LocalDateTime getDeadline() {
-        return deadline;
+    public Audit getAudit() {
+        return audit;
     }
 
-    public void setDeadline(LocalDateTime deadline) {
-        this.deadline = deadline;
+    public void setAudit(Audit audit) {
+        this.audit = audit;
     }
 
-    public void updateFrom(final Task source){
-        description = source.description;
-        done = source.done;
-        deadline = source.deadline;
-        group = source.group;
-
+    public Set<Task> getTasks() {
+        return tasks;
     }
 
+    void setTasks(Set<Task> tasks) {
+        this.tasks = tasks;
+    }
 
+    Project getProject() {
+        return project;
+    }
+
+    void setProject(Project project) {
+        this.project = project;
+    }
 }

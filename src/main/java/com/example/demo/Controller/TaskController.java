@@ -1,19 +1,18 @@
 package com.example.demo.Controller;
 
-import com.example.demo.TasksControl.TaskRepository;
+import com.example.demo.model.TaskRepository;
 import com.example.demo.model.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.stereotype.Repository;
 import org.springframework.web.bind.annotation.*;
 
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 import java.net.URI;
 import java.util.List;
-import java.util.Optional;
+
 
 
 @Controller
@@ -43,19 +42,22 @@ public class TaskController {
         return ResponseEntity.created(URI.create("/"+result.getId())).body(result);
     }
 
-    @RequestMapping(method = RequestMethod.PUT, path = "tasks/{id}")
+    @RequestMapping(method = RequestMethod.PUT, path = "/tasks/{id}")
     ResponseEntity<?> updateTasks(@PathVariable int id, @RequestBody @Valid Task entity){
         if(!repository.existsById(id)){
             logger.warn("Task no exists!");
             return ResponseEntity.notFound().build();
         }
-        entity.setId(id);
-        repository.save(entity);
+        repository.findById(id)
+                .ifPresent(task -> {
+                    task.updateFrom(entity);
+                    repository.save(task);
+                });
         return ResponseEntity.noContent().build();
     }
 
     @Transactional
-    @PatchMapping( "tasks/{id}")
+    @PatchMapping( "/tasks/{id}")
     ResponseEntity<?> toggleTasks(@PathVariable int id){
         if(!repository.existsById(id)){
             logger.warn("Task no exists!");
